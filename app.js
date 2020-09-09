@@ -4,6 +4,7 @@ const app               = express();
 const bodyParser        = require('body-parser');
 const fetch             = require("node-fetch");
 const mongoose          = require('mongoose');
+const cors = require('cors');
 
 const redis = require("redis");
 const client = redis.createClient();
@@ -12,6 +13,7 @@ const REDIS_BASIC        = require('./model/redis_basic');
 const PHOTO_STORE        = require('./model/photo-store');
 const PHOTO_STORE_COLL   = require('./database/photo_store-coll');
 
+app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
@@ -89,8 +91,6 @@ app.get('/remove-all-cart/:nameCart', async (req, res) => {
     res.json(removeAllCart)
 })
 
-//===============> END
-
 app.get('/photos', (req, res) => {
  
     // key to store results in Redis store
@@ -150,7 +150,6 @@ app.get('/info-hashes/:id', async (req, res) => {
     let infoHashes = await REDIS_BASIC.infoHash({id});
     res.json(infoHashes.data)
 }) 
-//===========> END
 
 //==========> LẤY VỊ TRÍ VÀ CỬA HÀNG XUNG QUANH
 app.post('/add-photo', async (req, res) => {
@@ -168,10 +167,8 @@ app.post('/add-photo', async (req, res) => {
 
 app.post('/stores', async (req, res) => {
     try {   
-         // let lng = "106.797263"
-        // let lat = "10.849314"
-        //let placeHome = "lng, lat";
-        let { lng, lat, maxDis } = req.body;
+        
+        let { lng, lat, maxDis } = req.query;
 
         let listPhotoStore = await PHOTO_STORE.getList({ lng, lat, maxDis });
         res.json(listPhotoStore);
@@ -184,9 +181,9 @@ app.post('/stores', async (req, res) => {
 app.get('/store-near', async (req, res) => {
     try {   
         
-        let { lng, lat } = req.query;
+        let { lng, lat, maxDis } = req.query;
 
-        let listPhotoStoreNear = await PHOTO_STORE.getListStoreNear({ lng, lat });
+        let listPhotoStoreNear = await PHOTO_STORE.getListStoreNear({ lng, lat, maxDis });
         res.json(listPhotoStoreNear);
 
     } catch (error) {
@@ -203,7 +200,7 @@ app.get('/find-store', async (req, res) => {
 
 const uri = 'mongodb://localhost/demo-geo';
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
 mongoose.set('useCreateIndex', true); //ẩn cảnh báo
 mongoose.set('useUnifiedTopology', true); // ẩn cảnh báo

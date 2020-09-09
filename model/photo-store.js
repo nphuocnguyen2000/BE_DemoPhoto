@@ -35,7 +35,7 @@ module.exports      = class PhotoStore extends PHOTO_COLL {
     static getList({ lng, lat, maxDis}) {
         return new Promise(async resolve => {
             try {
-
+                console.log(lng, lat, maxDis)
                 if (!lng || !lat || !maxDis)
                     return resolve({ error: true, message: 'params_invalid' });
 
@@ -63,8 +63,9 @@ module.exports      = class PhotoStore extends PHOTO_COLL {
     }
 
     //Demo list Photo
-    static getListStoreNear({ lng, lat}) {
+    static getListStoreNear({ lng, lat, maxDis}) {
         return new Promise(async resolve => {
+
             try {
 
                 if (!lng || !lat)
@@ -74,15 +75,13 @@ module.exports      = class PhotoStore extends PHOTO_COLL {
                         {
                             $geoNear: {
                                 near: { type: "Point", coordinates: [parseFloat(lng), parseFloat(lat)] },
-                                maxDistance: 5000,
+                                maxDistance: parseInt(maxDis) ,
                                 distanceField: "dist.calculated",
                                 includeLocs: "dist.location", // Returns distance
                                 spherical: true
                             }
                         }
                     ]);
-
-                    //console.log({ listStorePhoto })
     
                     if (!listStorePhoto) return resolve({ error: true, message: 'cannot_insert_point' });
                     return resolve({ error: false, data: listStorePhoto });
